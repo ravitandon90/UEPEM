@@ -1,0 +1,27 @@
+Packet_Size = 4000; % packet size 500 Bytes => 4000 bits.
+Packet_Transmission_Cost = 50 * (10 ^ -9); % Packet Transmission Cost = 50 nano Joule per Bit per Packet
+Amplification_Energy_Multi_Path = 13 * (10 ^ -16);   % Packet Amplification Cost = 0.0013 pico Joule per Bit per metre squared
+Amplification_Energy_Free_Space = 10  * (10 ^ (-12)); % 
+Energy_Data_Aggregation = 5 * (10 ^ -9);
+Num_Sensors = 1000;
+Area_Net = 500 * 500;
+Radius_Net = sqrt(Area_Net/pi);
+M = 4;
+r = Radius_Net/M;
+Area_ring = zeros (M, 1);
+Cluster_Size_ring = zeros (M, 1);
+Num_cluster_heads_ring = zeros (M, 1);
+Energy_ring = zeros (M, 1);
+Num_Sensors_ring = zeros (M, 1);
+
+for i = 1 : M
+    ring = i - 1;
+    Area_ring (i) = pi * r^2 * (2*ring+1);
+    Num_cluster_heads_ring (i) = sqrt ((3 * Amplification_Energy_Free_Space * Num_Sensors * (2*ring+1)^3)/(2*Amplification_Energy_Multi_Path)*Radius_Net^2*((ring+1)^6-(ring)^6));
+    Num_Sensors_ring (i) = (Num_Sensors * r^2 * (2 *ring+1))/(Radius_Net^2);
+    Cluster_Size_ring (i) = Num_Sensors_ring (i) / Num_cluster_heads_ring (i);
+    Energy_ring (i) = 
+end
+
+% For the ith ring 
+Energy_CH_i = Packet_Size *( 

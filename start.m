@@ -1,0 +1,58 @@
+Packet_Size = 4000; % packet size 500 Bytes => 4000 bits.
+Packet_Transmission_Cost = 50 * (10 ^ -9); % Packet Transmission Cost = 50 nano Joule per Bit per Packet
+Amplification_Energy_Multi_Path = 13 * (10 ^ -16);   % Packet Amplification Cost = 0.0013 pico Joule per Bit per metre squared
+Amplification_Energy_Free_Space = 10  * (10 ^ (-12)); % 
+Energy_Data_Aggregation = 5 * (10 ^ -9);
+Num_Sensors = 500;
+Area_Net = 500 * 500;
+path = 'C:/Users/RaviHome/Desktop/NetworkModel/Simulation/TheoreticalAnalysis/Data/';
+Radius_Net = sqrt(Area_Net/pi);
+M = 10;
+Mmax = 10;
+total_Energy_EPEM = zeros (Mmax, 1);
+total_Energy_UEPEM = zeros (Mmax, 1);
+% Energy_ring_EPEM = zeros (M, 1);
+% Energy_ring_UEPEM = zeros (M, 1);
+% energy_Usage_EPEM_CH = zeros (M, 1);
+% energy_Usage_UEPEM_CH = zeros (M, 1);
+% energy_Usage_EPEM_SN = zeros (M, 1);
+% energy_Usage_UEPEM_SN = zeros (M, 1);
+count = 0;
+sum = 0;
+%  for M = 1 : Mmax
+    count = count + 1;
+    [sum, Energy_ring_EPEM, num_Cluster_Head_EPEM, energy_Usage_EPEM_CH, energy_Usage_EPEM_SN, average_Cluster_Size_distance_EPEM, average_Cluster_Size_members_EPEM] = run_EPEM (Packet_Size, Packet_Transmission_Cost, Amplification_Energy_Multi_Path, Amplification_Energy_Free_Space, Energy_Data_Aggregation, Num_Sensors, Area_Net, Radius_Net, M);
+    total_Energy_EPEM (count) = sum;
+    [sum, Energy_ring_UEPEM, num_Cluster_Head_UEPEM, energy_Usage_UEPEM_CH, energy_Usage_UEPEM_SN, average_Cluster_Size_distance_UEPEM, average_Cluster_Size_members_UEPEM] = run_UEPEM (Packet_Size, Packet_Transmission_Cost, Amplification_Energy_Multi_Path, Amplification_Energy_Free_Space, Energy_Data_Aggregation, Num_Sensors, Area_Net, Radius_Net, M);
+    total_Energy_UEPEM (count) = sum;
+%  end
+
+% energyTotalFile = fopen(strcat (path, 'energyTotalFile.txt'),'w') ;
+% energyRingFile = fopen(strcat (path, 'energyRingFile.txt'),'w') ;
+% energyCHFile = fopen(strcat (path, 'energyCHFile.txt'),'w') ;
+% energySNFile = fopen(strcat (path, 'energySNFile.txt'),'w') ;
+% clusterSizeDistanceFile = fopen(strcat (path, 'clusterSizeDistanceFile.txt'),'w') ;
+% clusterSizeMembersFile = fopen(strcat (path, 'clusterSizeMembersFile.txt'),'w') ;
+numClusterHeadFile = fopen(strcat (path, 'numClusterHeadFile.txt'),'w') ;
+
+for i = 1 : M
+%     fprintf(energyTotalFile, '%d\t%f\t%f\r\n', i, total_Energy_EPEM (i), total_Energy_UEPEM (i));
+%     fprintf(energyRingFile, '%d\t%f\t%f\r\n',  i, Energy_ring_EPEM (i), Energy_ring_UEPEM (i) );
+%     fprintf(energyCHFile, '%d\t%f\t%f\r\n', i,  energy_Usage_EPEM_CH (i), energy_Usage_UEPEM_CH (i));
+%     fprintf(energySNFile, '%d\t%f\t%f\r\n', i,  energy_Usage_EPEM_SN (i), energy_Usage_UEPEM_SN (i));
+%     fprintf(clusterSizeDistanceFile, '%d\t%f\t%f\r\n', i, average_Cluster_Size_distance_EPEM(i), average_Cluster_Size_distance_UEPEM(i) );
+%     fprintf(clusterSizeMembersFile, '%d\t%f\t%f\r\n', i,  average_Cluster_Size_members_EPEM (i), average_Cluster_Size_members_UEPEM (i));    
+      fprintf(numClusterHeadFile, '%d\t%f\t%f\r\n', i,  num_Cluster_Head_EPEM (i), num_Cluster_Head_UEPEM (i));    
+end
+% fclose (energyTotalFile);
+% fclose (energyRingFile);
+% fclose (energyCHFile);
+% fclose (energySNFile);
+% fclose (clusterSizeDistanceFile);
+% fclose (clusterSizeMembersFile);
+fclose (numClusterHeadFile);
+% figure (1);
+% plot (average_Cluster_Size_distance_EPEM(:, 1), 'blue');
+% hold on;
+% plot (average_Cluster_Size_distance_UEPEM(:, 1), 'red');
+% 

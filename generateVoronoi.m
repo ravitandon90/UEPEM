@@ -1,0 +1,89 @@
+% Generating Voronoi Tesselations
+Packet_Size = 4000; % packet size 500 Bytes => 4000 bits.
+Packet_Transmission_Cost = 50 * (10 ^ -9); % Packet Transmission Cost = 50 nano Joule per Bit per Packet
+Amplification_Energy_Multi_Path = 13 * (10 ^ -16);   % Packet Amplification Cost = 0.0013 pico Joule per Bit per metre squared
+Amplification_Energy_Free_Space = 10  * (10 ^ (-12)); % 
+Energy_Data_Aggregation = 5 * (10 ^ -9);
+Num_Sensors = 500;
+Area_Net = 50*50;
+Sensor_Nodes = zeros (Num_Sensors, 2);
+num = rand (Num_Sensors, 2);
+Radius_Net = sqrt(Area_Net/pi);
+BS = [1200 1200];
+
+
+for i = 1 : Num_Sensors
+    radius = num(i, 1)* Radius_Net;
+    theta = num(i, 2)*2*pi;
+    Sensor_Nodes (i, 1) = BS (1, 1) + radius * cos (theta);
+    Sensor_Nodes (i, 2) = BS (1, 2) + Radius_Net * sin (theta);
+end
+Distance = zeros (Num_Sensors, Num_Sensors);
+
+
+
+
+for i=1 : Num_Sensors        
+    for j=1 : Num_Sensors            
+        Distance(i,j) = getDistance(Sensor_Nodes(i,1), Sensor_Nodes(i,2), Sensor_Nodes(j,1), Sensor_Nodes(j,2));        
+    end
+end
+
+M = 10;
+r = Radius_Net/M;
+Area_ring = zeros (M, 1);
+Cluster_Size_ring = zeros (M, 1);
+Num_cluster_heads_ring = zeros (M, 1);
+Energy_ring = zeros (M, 1);
+Num_Sensors_ring = zeros (M, 1);
+Energy_CH_ring = zeros (M, 1);
+Energy_Sensor_Node_ring = zeros (M, 1);
+Y = zeros (M, 1);
+P = zeros (M, 1);
+pr = 0.05;
+for i = 1 : M
+    ring = i - 1;
+    Area_ring (i) = pi * r^2 * (2*ring+1);
+    Num_Sensors_ring (i) = (Num_Sensors * r^2 * (2 *ring+1))/(Radius_Net^2);
+    Num_cluster_heads_ring (i) = min(sqrt ((3 * Amplification_Energy_Free_Space * Num_Sensors * (2*ring+1)^3)/((2*Amplification_Energy_Multi_Path)*Radius_Net^2*((ring+1)^6-(ring)^6))), Num_Sensors_ring (i));    
+%     Num_cluster_heads_ring (i) = pr * Num_Sensors_ring (i);
+    Cluster_Size_ring (i) = Num_Sensors_ring (i) / Num_cluster_heads_ring (i);
+    Z_i = (r^4 * ((ring+1)^6-(ring)^6))/(3*(2*ring+1));
+    Energy_CH_ring (i)  = Packet_Size * ((Packet_Transmission_Cost+ Energy_Data_Aggregation)*(Cluster_Size_ring (i)) + Amplification_Energy_Multi_Path * Z_i) ;
+    Y (i) = sqrt((r^2 * (2*ring+1)) / (2* Num_cluster_heads_ring (i)));
+    Energy_Sensor_Node_ring (i) = Packet_Size *(Packet_Transmission_Cost + Amplification_Energy_Free_Space * (Y(i)^2)) ;
+    Energy_ring (i) = Num_cluster_heads_ring (i) * Energy_CH_ring (i) + (Num_Sensors_ring(i) - Num_cluster_heads_ring(i)) * Energy_Sensor_Node_ring (i);
+    P (i) = Num_cluster_heads_ring (i) / Num_Sensors_ring (i);
+end
+
+[CH_Matrix, clusterSize, clusterHead, numClusters] = formClusters (Num_Sensors, Distance, Radius_Net, M, Sensor_Nodes, BS, P);
+num_members = Num_Sensors-numClusters;
+
+memberCount = 0; 
+CHcount = 0;
+SN = zeros (num_members, 2);
+CH = zeros (numClusters, 2);
+
+for i=1 : Num_Sensors
+    if (CH_Matrix (i, i) == 1)
+        CHcount = CHcount + 1;
+        CH (CHcount, :) = Sensor_Nodes(i, :);
+    else 
+        memberCount = memberCount + 1;
+        SN (memberCount, :) = Sensor_Nodes(i, :);
+    end
+end
+% 
+% 
+figure (1);
+plot (BS(1,1), BS(1,2), 'black square');
+hold on;
+plot (SN(:,1), SN(:,2), 'blue .');
+hold on;
+% % plot (HEN(:,1), HEN(:,2), 'blue .');
+% % hold on;
+plot (CH(:, 1), CH (:, 2), 'red +');
+hold on;
+voronoi (CH(:,1), CH(:,2));
+hold on;
+pause
